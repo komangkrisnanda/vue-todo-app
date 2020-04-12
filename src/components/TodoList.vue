@@ -5,13 +5,32 @@
     <div v-for="(todo, index) in todos" :key="todo.id">
         <div class="todo-item">
             <div class="todo-item-left">
-                <div v-if="!todo.isEditing" @dblclick="editTodo(todo)" class="todo-item-label">{{ todo.title }}</div>
+                <input type="checkbox" v-model="todo.isCompleted">
+                <div 
+                    v-if="!todo.isEditing" 
+                    @dblclick="editTodo(todo)" 
+                    class="todo-item-label"
+                    :class="{ completed: todo.isCompleted}"
+                    >
+                    {{ todo.title }}
+                </div>
                 <input v-else class="todo-item-edit" @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)" type="text" v-model="todo.title" v-focus>
             </div>
             <div class="remove-item" @click="removeTodo(index)">
                 &times;
             </div>
         </div>
+    </div>
+
+
+    <div class="extra-container">
+        <div>
+            <label>
+                <input type="checkbox" @change="checkAllTodo($event)">
+                    Check All
+            </label>
+        </div>
+        <div>{{ remaining }} items left</div>
     </div>
 
   </div>
@@ -29,17 +48,17 @@ export default {
               {
                   'id': 1,
                   'title': 'Finish Vue Screencast',
-                  'completed': false,
+                  'isCompleted': false,
                   'isEditing': false,
               },
               {
                   'id': 2,
                   'title': 'Take over world',
-                  'completed': false,
+                  'isCompleted': false,
                   'isEditing': false
               },
           ],
-          beforeEditCache :''
+          beforeEditCache :'',
       }
   },
   methods: {
@@ -54,7 +73,7 @@ export default {
           this.todos.push({
               id: this.idForTodo,
               title: this.newTodo,
-              completed: false,
+              isCompleted: false,
               isEditing: false
           });
 
@@ -77,6 +96,9 @@ export default {
       cancelEdit(todo){
           todo.title = this.beforeEditCache;
           todo.isEditing = false;
+      },
+      checkAllTodo(event){
+          return this.todos.map((todo) => todo.isCompleted = event.target.checked);
       }
   },
   directives: {
@@ -86,7 +108,12 @@ export default {
                 el.focus()
             }
         }
-    }
+  },
+  computed: {
+      remaining(){
+          return this.todos.filter(todo => todo.isCompleted == true).length;
+      }
+  }
 }
 </script>
 
@@ -140,6 +167,43 @@ export default {
         &:focus{
             outline: none;
         }
+    }
+
+    .completed{
+        text-decoration: line-through;
+        color: grey;
+    }
+
+    .extra-container{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 16px !important;
+        border-top: 1px solid lightgrey;
+        padding-top: 14px;
+        margin-bottom: 14px;
+
+        div, label{
+            font-size: 16px !important;
+        }
+    }
+
+    button{
+        font-size: 14px;
+        background-color: white;
+        appearance: none;
+
+        &:hover{
+            background: lightgreen;
+        }
+
+        &:focus{
+            outline: none;
+        }
+    }
+
+    .active{
+        background: lightgreen;
     }
 
 </style>
