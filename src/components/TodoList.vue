@@ -2,7 +2,7 @@
   <div>
     <input type="text" class="todo-input" placeholder="What needs to be done" v-model="newTodo" @keyup.enter="addTodo">
     
-    <div v-for="(todo, index) in todos" :key="todo.id">
+    <div v-for="(todo, index) in todosFiltered" :key="todo.id">
         <div class="todo-item">
             <div class="todo-item-left">
                 <input type="checkbox" v-model="todo.isCompleted">
@@ -33,6 +33,21 @@
         <div>{{ remaining }} items left</div>
     </div>
 
+    <div class="extra-container">
+        <div>
+            <button :class="{ active: filter == 'all' }" @click="filter = 'all'" >All</button>
+            <button :class="{ active: filter == 'active' }" @click="filter = 'active'" >Active</button>
+            <button :class="{ active: filter == 'completed' }" @click="filter = 'completed'" >Completed</button>
+        </div>
+        <div>
+           <transition name="fade">
+                <button v-if="showClearCompletedButton" @click="clearCompleted">
+                    Clear Completed
+                </button>
+           </transition>
+        </div>
+    </div>
+
   </div>
 </template>
 
@@ -44,6 +59,7 @@ export default {
       return {
           idForTodo: 3,
           newTodo: '',
+          filter: 'all',
           todos: [
               {
                   'id': 1,
@@ -99,6 +115,9 @@ export default {
       },
       checkAllTodo(event){
           return this.todos.map((todo) => todo.isCompleted = event.target.checked);
+      },
+      clearCompleted(){
+          this.todos = this.todos.filter((todo) => todo.isCompleted == false);
       }
   },
   directives: {
@@ -111,8 +130,24 @@ export default {
   },
   computed: {
       remaining(){
-          return this.todos.filter(todo => todo.isCompleted == true).length;
-      }
+          return this.todos.filter(todo => todo.isCompleted == false).length;
+      },
+      todosFiltered(){
+          if(this.filter == 'all'){
+              return this.todos.filter((todo) => todo.isCompleted == true || todo.isCompleted == false )
+          }
+          else if(this.filter == 'active'){
+            return this.todos.filter((todo) => todo.isCompleted == false)
+          }
+          else if(this.filter == 'completed'){
+            return this.todos.filter((todo) => todo.isCompleted == true)
+          }
+
+          return this.todos;
+      },
+      showClearCompletedButton(){
+          return this.todos.filter((todo) => todo.isCompleted == true).length > 0;
+      },
   }
 }
 </script>
@@ -204,6 +239,14 @@ export default {
 
     .active{
         background: lightgreen;
+    }
+
+    .fade-enter-active, .fade-leave-active{
+        transition: opacity .2s;
+    }
+
+    .fade-enter, .fade-leave-to{
+        opacity: 0
     }
 
 </style>
